@@ -169,3 +169,79 @@ def display_wallet_analytics(analytics: Dict[str, Any]):
     print(f"📊 Volume: ${volume:,.2f}")
     print(f"🏆 Rank: {rank_display}")
     print("=" * 70 + "\n")
+
+
+def display_open_orders(orders: List[Dict[str, Any]]):
+    """
+    Display user's open orders in a formatted table.
+    
+    Args:
+        orders: List of order dictionaries from get_limit_orders()
+    
+    Returns:
+        List of live orders for further interaction
+    """
+    if not orders:
+        print("\n📋 No open orders found.")
+        return []
+    
+    # Filter for only LIVE orders
+    live_orders = [order for order in orders if order.get('status') == 'LIVE']
+    
+    if not live_orders:
+        print("\n📋 No open orders found.")
+        return []
+    
+    print("\n" + "=" * 130)
+    print(f"{'OPEN ORDERS':^130}")
+    print("=" * 130)
+    print(f"\n📍 Total Open Orders: {len(live_orders)}\n")
+    
+    # Table header
+    print(f"{'#':<4} | {'Order ID':<12} | {'Market':<35} | {'Side':<4} | {'Outcome':<7} | {'Price':<8} | {'Size':<8} | {'Filled':<8} | {'Type':<5} | {'Age':<12}")
+    print("-" * 130)
+    
+    # Sort by creation time (newest first)
+    sorted_orders = sorted(live_orders, key=lambda x: x.get('created_at', 0), reverse=True)
+    
+    # Current timestamp for age calculation
+    import time
+    current_time = int(time.time())
+    
+    # Print each order
+    for i, order in enumerate(sorted_orders, 1):
+        # Extract key fields
+        order_id = order.get('id', 'N/A')[:10]  # Truncate ID
+        market = order.get('market', 'Unknown')[:33]  # Truncate market hash
+        side = order.get('side', '?')
+        outcome = order.get('outcome', '?')
+        price = order.get('price', 0)
+        original_size = float(order.get('original_size', 0))
+        size_matched = float(order.get('size_matched', 0))
+        size_remaining = original_size - size_matched
+        order_type = order.get('order_type', 'N/A')
+        created_at = order.get('created_at', 0)
+        
+        # Calculate age
+        age_seconds = current_time - created_at
+        if age_seconds < 60:
+            age_str = f"{age_seconds}s"
+        elif age_seconds < 3600:
+            age_str = f"{age_seconds // 60}m"
+        elif age_seconds < 86400:
+            age_str = f"{age_seconds // 3600}h"
+        else:
+            age_str = f"{age_seconds // 86400}d"
+        
+        # Filled percentage
+        filled_pct = (size_matched / original_size * 100) if original_size > 0 else 0
+        filled_str = f"{filled_pct:.0f}%"
+        
+        # Side indicator
+        side_indicator = "🟢" if side == "BUY" else "🔴"
+        
+        print(f"{i:<4} | {order_id:<12} | {market:<35} | {side_indicator}{side:<3} | {outcome:<7} | ${float(price):<7.3f} | {size_remaining:<8.1f} | {filled_str:<8} | {order_type:<5} | {age_str:<12}")
+    
+    print("=" * 130 + "\n")
+    
+    return live_orders
