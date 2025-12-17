@@ -72,3 +72,100 @@ def display_event_table(event):
     print("=" * 105)
     
     return sorted_markets
+
+
+def display_holdings(holdings: List[Dict[str, Any]]):
+    """
+    Display user's current holdings/positions in a formatted table.
+    
+    Args:
+        holdings: List of position dictionaries from get_holdings()
+    """
+    if not holdings:
+        print("\n📦 No holdings found.")
+        return
+    
+    print("\n" + "=" * 150)
+    print(f"{'PORTFOLIO HOLDINGS':^150}")
+    print("=" * 150)
+    
+    # Calculate totals
+    total_value = sum(pos.get('currentValue', 0) for pos in holdings)
+    total_pnl = sum(pos.get('cashPnl', 0) for pos in holdings)
+    total_initial = sum(pos.get('initialValue', 0) for pos in holdings)
+    total_pct_pnl = ((total_pnl / total_initial) * 100) if total_initial > 0 else 0
+    
+    # Print summary
+    print(f"\n💰 Total Portfolio Value: ${total_value:,.2f}")
+    print(f"📊 Total P&L: ${total_pnl:,.2f} ({total_pct_pnl:+.2f}%)")
+    print(f"📍 Positions: {len(holdings)}\n")
+    
+    # Table header
+    print(f"{'#':<4} | {'Market':<50} | {'Side':<4} | {'Size':<8} | {'Avg':<7} | {'Curr':<7} | {'Value':<10} | {'P&L $':<10} | {'P&L %':<10}")
+    print("-" * 150)
+    
+    # Sort by absolute PnL (biggest wins/losses first)
+    sorted_holdings = sorted(holdings, key=lambda x: abs(x.get('cashPnl', 0)), reverse=True)
+    
+    # Print each position
+    for i, pos in enumerate(sorted_holdings, 1):
+        # Extract key fields
+        title = pos.get('title', 'Unknown Market')
+        title_short = (title[:47] + '...') if len(title) > 47 else title
+        
+        outcome = pos.get('outcome', '?')
+        size = pos.get('size', 0)
+        avg_price = pos.get('avgPrice', 0)
+        cur_price = pos.get('curPrice', 0)
+        current_value = pos.get('currentValue', 0)
+        cash_pnl = pos.get('cashPnl', 0)
+        pct_pnl = pos.get('percentPnl', 0)
+        
+        # Color indicators for PnL
+        pnl_indicator = "🟢" if cash_pnl >= 0 else "🔴"
+        
+        print(f"{i:<4} | {title_short:<50} | {outcome:<4} | {size:<8.1f} | ${avg_price:<6.3f} | ${cur_price:<6.3f} | ${current_value:<9.2f} | {pnl_indicator}${cash_pnl:<8.2f} | {pct_pnl:+9.2f}%")
+    
+    print("=" * 150)
+    print(f"{'TOTAL':<69} | ${total_value:<9.2f} | ${total_pnl:<9.2f} | {total_pct_pnl:+9.2f}%")
+    print("=" * 150 + "\n")
+
+
+def display_wallet_analytics(analytics: Dict[str, Any]):
+    """
+    Display wallet performance analytics from leaderboard.
+    
+    Args:
+        analytics: Dictionary with keys time_period, pnl, volume, rank, username
+    """
+    if not analytics:
+        print("\n❌ No analytics data available.")
+        return
+    
+    time_period = analytics.get('time_period', 'N/A')
+    pnl = analytics.get('pnl', 0)
+    volume = analytics.get('volume', 0)
+    rank = analytics.get('rank')
+    username = analytics.get('username', 'Anonymous')
+    
+    # Determine period display
+    period_display = {
+        'DAY': 'Today',
+        'WEEK': 'This Week',
+        'MONTH': 'This Month',
+        'ALL': 'All Time'
+    }.get(time_period, time_period)
+    
+    # PnL indicator
+    pnl_indicator = "🟢" if pnl >= 0 else "🔴"
+    rank_display = f"#{rank}" if rank else "Unranked"
+    
+    print("\n" + "=" * 70)
+    print(f"{'WALLET ANALYTICS':^70}")
+    print("=" * 70)
+    print(f"\n👤 User: {username}")
+    print(f"📅 Period: {period_display}")
+    print(f"{pnl_indicator} P&L: ${pnl:,.2f}")
+    print(f"📊 Volume: ${volume:,.2f}")
+    print(f"🏆 Rank: {rank_display}")
+    print("=" * 70 + "\n")
