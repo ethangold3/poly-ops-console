@@ -3,6 +3,7 @@ from typing import Optional, List
 from concurrent.futures import ThreadPoolExecutor
 from data.events_node import EventNode
 from datetime import datetime, timedelta, timezone
+from difflib import SequenceMatcher
 
 
 def search_events(
