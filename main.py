@@ -1,8 +1,6 @@
 import sys
 import os
-import asyncio
 from typing import Any, List, Optional
-from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 
 from data.trader_node import TraderNode
@@ -20,6 +18,10 @@ class PolyTerminal:
     def __init__(self):
         self.proxy_address = os.getenv("PROXY_ADDRESS")
         self.private_key = os.getenv("PRIVATE_MAGIC_KEY")
+
+        if not self.proxy_address or not self.private_key:
+            print("Error: PROXY_ADDRESS and PRIVATE_MAGIC_KEY must be set in your .env file.")
+            sys.exit(1)
         
         # Initialize the trader node immediately
         self.trader = TraderNode(
@@ -129,7 +131,6 @@ class PolyTerminal:
                         print("Cancellation aborted.")
                     continue
                 
-                # Cancel specific
                 try:
                     idx = int(action) - 1
                     if 0 <= idx < len(live_orders):
@@ -203,10 +204,9 @@ class PolyTerminal:
             if choice == 'q': sys.exit()
             if choice == 'w': self.run_wallet_menu()
             if choice == 'r': current_view = events[:]
-            if choice == 'n': return self.run_discovery_flow() # Restart
+            if choice == 'n': return
             
             if choice == 'f':
-                # Local filter application
                 params = {
                     "search_query": self._get_input("Search Title", default=None),
                     "min_vol": self._get_input("Min Vol", default=None, cast_type=float),
@@ -215,7 +215,6 @@ class PolyTerminal:
                 }
                 current_view = filter_events(events, **params)
             
-            # Numeric selection (Inspect Event)
             elif choice.isdigit():
                 idx = int(choice) - 1
                 if 0 <= idx < len(current_view):
@@ -233,7 +232,6 @@ class PolyTerminal:
             else:
                 use_filter = self._get_input("Use filters?", default=False, cast_type=bool)
                 
-                # RESTORED: All default parameters from your original code
                 tag_slug = None
                 sort_by = "volume"
                 liquidity_min = 0
@@ -243,7 +241,6 @@ class PolyTerminal:
                 ascending = False
 
                 if use_filter:
-                    # RESTORED: All user inputs from your original code
                     tag_slug = self._get_input("Tag slug (e.g. 'politics')", default=None)
                     sort_by = self._get_input("Sort By", default="volume")
                     liquidity_min = self._get_input("Min Liquidity", default=5000, cast_type=int)

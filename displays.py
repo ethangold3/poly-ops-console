@@ -1,5 +1,6 @@
 from data.events_node import EventNode
 from typing import List, Dict, Any
+import time
 
 def print_orderbook_summary(orderbook, market_title):
     """
@@ -12,22 +13,18 @@ def print_orderbook_summary(orderbook, market_title):
     best_bids = sorted(orderbook.bids, key=lambda x: float(x.price), reverse=True)[:7]
     best_asks = sorted(orderbook.asks, key=lambda x: float(x.price), reverse=False)[:7]
 
-    # 2. Print Header
     print(f"\n{'='*55}")
     print(f"{market_title:^55}")
     print(f"{'='*55}")
     print(f"{'BID SIZE':>12} | {'BID PRICE':>10}   {'ASK PRICE':<10} | {'ASK SIZE':<12}")
     print(f"{'-'*12}-+-{'-'*10}---{'-'*10}-+-{'-'*12}")
 
-    # 3. Print Rows
     for i in range(7):
-        # Extract data if available, else use empty strings
         b_price = float(best_bids[i].price) if i < len(best_bids) else None
         b_size  = float(best_bids[i].size)  if i < len(best_bids) else None
         a_price = float(best_asks[i].price) if i < len(best_asks) else None
         a_size  = float(best_asks[i].size)  if i < len(best_asks) else None
 
-        # Format strings (showing '-' if no order exists at that depth)
         b_str_price = f"{b_price:10.3f}" if b_price is not None else "          "
         b_str_size  = f"{b_size:12.2f}"  if b_size  is not None else "            "
         a_str_price = f"{a_price:<10.3f}" if a_price is not None else "          "
@@ -89,27 +86,21 @@ def display_holdings(holdings: List[Dict[str, Any]]):
     print(f"{'PORTFOLIO HOLDINGS':^150}")
     print("=" * 150)
     
-    # Calculate totals
     total_value = sum(pos.get('currentValue', 0) for pos in holdings)
     total_pnl = sum(pos.get('cashPnl', 0) for pos in holdings)
     total_initial = sum(pos.get('initialValue', 0) for pos in holdings)
     total_pct_pnl = ((total_pnl / total_initial) * 100) if total_initial > 0 else 0
     
-    # Print summary
     print(f"\nTotal Portfolio Value: ${total_value:,.2f}")
     print(f"Total P&L: ${total_pnl:,.2f} ({total_pct_pnl:+.2f}%)")
     print(f"Positions: {len(holdings)}\n")
     
-    # Table header
     print(f"{'#':<4} | {'Market':<50} | {'Side':<4} | {'Size':<8} | {'Avg':<7} | {'Curr':<7} | {'Value':<10} | {'P&L $':<10} | {'P&L %':<10}")
     print("-" * 150)
     
-    # Sort by absolute PnL (biggest wins/losses first)
     sorted_holdings = sorted(holdings, key=lambda x: abs(x.get('cashPnl', 0)), reverse=True)
     
-    # Print each position
     for i, pos in enumerate(sorted_holdings, 1):
-        # Extract key fields
         title = pos.get('title', 'Unknown Market')
         title_short = (title[:47] + '...') if len(title) > 47 else title
         
@@ -121,7 +112,6 @@ def display_holdings(holdings: List[Dict[str, Any]]):
         cash_pnl = pos.get('cashPnl', 0)
         pct_pnl = pos.get('percentPnl', 0)
         
-        # Indicators for PnL
         pnl_indicator = "+" if cash_pnl >= 0 else "-"
         
         print(f"{i:<4} | {title_short:<50} | {outcome:<4} | {size:<8.1f} | ${avg_price:<6.3f} | ${cur_price:<6.3f} | ${current_value:<9.2f} | {pnl_indicator}${abs(cash_pnl):<8.2f} | {pct_pnl:+9.2f}%")
@@ -148,7 +138,6 @@ def display_wallet_analytics(analytics: Dict[str, Any]):
     rank = analytics.get('rank')
     username = analytics.get('username', 'Anonymous')
     
-    # Determine period display
     period_display = {
         'DAY': 'Today',
         'WEEK': 'This Week',
@@ -156,7 +145,6 @@ def display_wallet_analytics(analytics: Dict[str, Any]):
         'ALL': 'All Time'
     }.get(time_period, time_period)
     
-    # PnL indicator
     pnl_indicator = "+" if pnl >= 0 else "-"
     rank_display = f"#{rank}" if rank else "Unranked"
     
@@ -185,7 +173,6 @@ def display_open_orders(orders: List[Dict[str, Any]]):
         print("\nNo open orders found.")
         return []
     
-    # Filter for only LIVE orders
     live_orders = [order for order in orders if order.get('status') == 'LIVE']
     
     if not live_orders:
@@ -197,22 +184,16 @@ def display_open_orders(orders: List[Dict[str, Any]]):
     print("=" * 130)
     print(f"\nTotal Open Orders: {len(live_orders)}\n")
     
-    # Table header
     print(f"{'#':<4} | {'Order ID':<12} | {'Market':<35} | {'Side':<4} | {'Outcome':<7} | {'Price':<8} | {'Size':<8} | {'Filled':<8} | {'Type':<5} | {'Age':<12}")
     print("-" * 130)
     
-    # Sort by creation time (newest first)
     sorted_orders = sorted(live_orders, key=lambda x: x.get('created_at', 0), reverse=True)
     
-    # Current timestamp for age calculation
-    import time
     current_time = int(time.time())
     
-    # Print each order
     for i, order in enumerate(sorted_orders, 1):
-        # Extract key fields
-        order_id = order.get('id', 'N/A')[:10]  # Truncate ID
-        market = order.get('market', 'Unknown')[:33]  # Truncate market hash
+        order_id = order.get('id', 'N/A')[:10]
+        market = order.get('market', 'Unknown')[:33]
         side = order.get('side', '?')
         outcome = order.get('outcome', '?')
         price = order.get('price', 0)
@@ -222,7 +203,6 @@ def display_open_orders(orders: List[Dict[str, Any]]):
         order_type = order.get('order_type', 'N/A')
         created_at = order.get('created_at', 0)
         
-        # Calculate age
         age_seconds = current_time - created_at
         if age_seconds < 60:
             age_str = f"{age_seconds}s"
@@ -233,11 +213,9 @@ def display_open_orders(orders: List[Dict[str, Any]]):
         else:
             age_str = f"{age_seconds // 86400}d"
         
-        # Filled percentage
         filled_pct = (size_matched / original_size * 100) if original_size > 0 else 0
         filled_str = f"{filled_pct:.0f}%"
         
-        # Side indicator
         side_indicator = "+" if side == "BUY" else "-"
         
         print(f"{i:<4} | {order_id:<12} | {market:<35} | {side_indicator}{side:<3} | {outcome:<7} | ${float(price):<7.3f} | {size_remaining:<8.1f} | {filled_str:<8} | {order_type:<5} | {age_str:<12}")

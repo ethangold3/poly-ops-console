@@ -63,38 +63,37 @@ def get_wallet_analytics(
         return None
 
 
-def get_holdings(user: str):
+def get_holdings(user: str) -> Optional[List[Dict[str, Any]]]:
+    url = 'https://data-api.polymarket.com/positions'
+    all_positions = []
+    offset = 0
+    limit = 500
+    has_more = True
 
-        url = 'https://data-api.polymarket.com/positions'
-        all_positions = []
-        offset = 0
-        limit = 500
-        has_more = True
+    params_base = {
+        "user": user,
+        "sizeThreshold": 1,
+        "sortBy": "TOKENS",
+        "sortDirection": "DESC"
+    }
 
-        params_base = {
-            "user": user,
-            "sizeThreshold": 1,
-            "sortBy": "TOKENS",
-            "sortDirection": "DESC"
-        }
+    try:
+        while has_more:
+            params = params_base.copy()
+            params["offset"] = offset
+            params["limit"] = limit
 
-        try:
-            while has_more:
-                params = params_base.copy()
-                params["offset"] = offset
-                params["limit"] = limit
+            response = requests.get(url, params=params)
+            response.raise_for_status()
+            current_batch = response.json()  # API returns a direct list
+            
+            all_positions.extend(current_batch)
 
-                response = requests.get(url, params=params)
-                response.raise_for_status()
-                current_batch = response.json()  # API returns a direct list
-                
-                all_positions.extend(current_batch)
-
-                if len(current_batch) < limit:
-                    has_more = False
-                else:
-                    offset += limit
-            return all_positions
-        except Exception as e:
-            print(f"Failed to fetch holdings: {e}")
-            return None
+            if len(current_batch) < limit:
+                has_more = False
+            else:
+                offset += limit
+        return all_positions
+    except Exception as e:
+        print(f"Failed to fetch holdings: {e}")
+        return None
