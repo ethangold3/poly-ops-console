@@ -1,5 +1,5 @@
 import requests
-from typing import Literal, Optional, Dict, Any
+from typing import Literal, Optional, Dict, Any, List
 
 
 def get_wallet_analytics(
