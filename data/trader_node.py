@@ -142,10 +142,3 @@ class TraderNode:
         except Exception as e:
             print(f"[{self.label}] Failed to fetch order book for {token}: {e}")
             return None
-
-if __name__ == "__main__":
-    import os
-    from dotenv import load_dotenv
-    load_dotenv()
-    trader_node = TraderNode(private_key = os.getenv("INTERVIEW_PRIVATE_MAGIC_KEY"), sig_type = 1, funder = os.getenv("INTERVIEW_PROXY_ADDRESS"), label = "Test Node")
-    print(trader_node.get_open_orders())
