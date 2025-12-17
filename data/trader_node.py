@@ -30,41 +30,6 @@ class TraderNode:
             print("Error connecting in TraderNode._connect:", e)
             return
 
-    def get_holdings(self):
-
-        url = 'https://data-api.polymarket.com/positions'
-        all_positions = []
-        offset = 0
-        limit = 500
-        has_more = True
-
-        params_base = {
-            "user": self.funder,
-            "sizeThreshold": 1,
-            "sortBy": "TOKENS",
-            "sortDirection": "DESC"
-        }
-
-        try:
-            while has_more:
-                params = params_base.copy()
-                params["offset"] = offset
-                params["limit"] = limit
-
-                response = requests.get(url, params=params)
-                response.raise_for_status()
-                current_batch = response.json()  # API returns a direct list
-                
-                all_positions.extend(current_batch)
-
-                if len(current_batch) < limit:
-                    has_more = False
-                else:
-                    offset += limit
-            return all_positions
-        except Exception as e:
-            print(f"[{self.label}] ❌ Failed to fetch holdings: {e}")
-            return None
 
 
     def get_trades(self):
@@ -98,11 +63,15 @@ class TraderNode:
     def get_pnl(self):
         return
 
-    def get_limit_orders(self):
+    def get_open_orders(self):
         return self.client.get_orders()
 
     def kill_limit_orders(self):
         return self.client.cancel_all()
+
+
+    def cancel_specific_order(self, order_id: str):
+        return self.client.cancel(order_id)
 
     def sharpe_ratio(self):
         return
@@ -155,15 +124,12 @@ class TraderNode:
             ord = self.client.create_order(order_args)
             resp = self.client.post_order(ord, OrderType.FOK)
             print(f"⚡ Market Order Executed! ID: {resp.get('orderID')}")
-            print('printing full order response: ', resp)
             return resp
         except Exception as e:
             print(f"❌ Market Order Failed (Likely not enough liquidity): {e}")
             return None
 
 
-    def get_markets(self):
-        return self.client.get_markets()
     
     def get_order_book(self, token: str):
         """
@@ -177,10 +143,9 @@ class TraderNode:
             print(f"[{self.label}] ❌ Failed to fetch order book for {token}: {e}")
             return None
 
-# if __name__ == "__main__":
-#     import os
-#     from dotenv import load_dotenv
-#     load_dotenv()
-#     trader_node = TraderNode(private_key = os.getenv("INTERVIEW_PRIVATE_MAGIC_KEY"), sig_type = 1, funder = os.getenv("INTERVIEW_PROXY_ADDRESS"), label = "Test Node")
-#     print(trader_node.get_holdings())
-#     print(trader_node.get_)
+if __name__ == "__main__":
+    import os
+    from dotenv import load_dotenv
+    load_dotenv()
+    trader_node = TraderNode(private_key = os.getenv("INTERVIEW_PRIVATE_MAGIC_KEY"), sig_type = 1, funder = os.getenv("INTERVIEW_PROXY_ADDRESS"), label = "Test Node")
+    print(trader_node.get_open_orders())
