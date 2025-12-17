@@ -3,7 +3,7 @@ from py_clob_client.clob_types import BalanceAllowanceParams, TradeParams, BookP
 import requests
 from typing import List
 from displays import print_orderbook_summary
-from py_clob_client.constants import BUY, SELL
+from data.events_node import MarketNode
 
 class TraderNode:
     def __init__(self, private_key, sig_type, funder, label):
@@ -123,13 +123,13 @@ class TraderNode:
             )
             
             # GTC = Good Til Cancelled (Standard Limit Order)
-            resp = self.client.create_and_post_order(order_args, order_type=OrderType.GTC)
+            ord = self.client.create_order(order_args)
+            resp = self.client.post_order(ord, OrderType.GTC)
             print(f"✅ Limit Order Placed! ID: {resp.get('orderID')}")
             return resp
-
         except Exception as e:
             print(f"❌ Limit Order Failed: {e}")
-            return None
+            return None   
 
     def place_market_order(self, market_node: MarketNode, outcome_index: int, side: str, size: float):
 
@@ -140,7 +140,7 @@ class TraderNode:
             # If Buying, we are willing to pay up to 100 cents (worst case) to ensure we get it.
             # If Selling, we are willing to sell down to 0 cents.
             # (The matching engine gives you the Best Execution price regardless)
-            aggressive_price = 0.99 if side == BUY else 0.01
+            aggressive_price = 0.99 if side == "BUY" else 0.01
             
 
             order_args = OrderArgs(
@@ -152,8 +152,10 @@ class TraderNode:
             
             # FOK = Fill Or Kill. Either fill the WHOLE size immediately, or cancel.
             # This protects you from getting partially filled on a tiny order.
-            resp = self.client.create_and_post_order(order_args, order_type=OrderType.FOK)
+            ord = self.client.create_order(order_args)
+            resp = self.client.post_order(ord, OrderType.FOK)
             print(f"⚡ Market Order Executed! ID: {resp.get('orderID')}")
+            print('printing full order response: ', resp)
             return resp
         except Exception as e:
             print(f"❌ Market Order Failed (Likely not enough liquidity): {e}")
@@ -180,5 +182,5 @@ class TraderNode:
 #     from dotenv import load_dotenv
 #     load_dotenv()
 #     trader_node = TraderNode(private_key = os.getenv("INTERVIEW_PRIVATE_MAGIC_KEY"), sig_type = 1, funder = os.getenv("INTERVIEW_PROXY_ADDRESS"), label = "Test Node")
-#     order_book = trader_node.get_order_book('22175591188013764209793147099992596396062856353987940360720452247836038283282')
-#     print_orderbook_summary(order_book, "Will NEwsom Run?")
+#     print(trader_node.get_holdings())
+#     print(trader_node.get_)
