@@ -82,7 +82,7 @@ def display_holdings(holdings: List[Dict[str, Any]]):
         holdings: List of position dictionaries from get_holdings()
     """
     if not holdings:
-        print("\n📦 No holdings found.")
+        print("\nNo holdings found.")
         return
     
     print("\n" + "=" * 150)
@@ -96,9 +96,9 @@ def display_holdings(holdings: List[Dict[str, Any]]):
     total_pct_pnl = ((total_pnl / total_initial) * 100) if total_initial > 0 else 0
     
     # Print summary
-    print(f"\n💰 Total Portfolio Value: ${total_value:,.2f}")
-    print(f"📊 Total P&L: ${total_pnl:,.2f} ({total_pct_pnl:+.2f}%)")
-    print(f"📍 Positions: {len(holdings)}\n")
+    print(f"\nTotal Portfolio Value: ${total_value:,.2f}")
+    print(f"Total P&L: ${total_pnl:,.2f} ({total_pct_pnl:+.2f}%)")
+    print(f"Positions: {len(holdings)}\n")
     
     # Table header
     print(f"{'#':<4} | {'Market':<50} | {'Side':<4} | {'Size':<8} | {'Avg':<7} | {'Curr':<7} | {'Value':<10} | {'P&L $':<10} | {'P&L %':<10}")
@@ -121,10 +121,10 @@ def display_holdings(holdings: List[Dict[str, Any]]):
         cash_pnl = pos.get('cashPnl', 0)
         pct_pnl = pos.get('percentPnl', 0)
         
-        # Color indicators for PnL
-        pnl_indicator = "🟢" if cash_pnl >= 0 else "🔴"
+        # Indicators for PnL
+        pnl_indicator = "+" if cash_pnl >= 0 else "-"
         
-        print(f"{i:<4} | {title_short:<50} | {outcome:<4} | {size:<8.1f} | ${avg_price:<6.3f} | ${cur_price:<6.3f} | ${current_value:<9.2f} | {pnl_indicator}${cash_pnl:<8.2f} | {pct_pnl:+9.2f}%")
+        print(f"{i:<4} | {title_short:<50} | {outcome:<4} | {size:<8.1f} | ${avg_price:<6.3f} | ${cur_price:<6.3f} | ${current_value:<9.2f} | {pnl_indicator}${abs(cash_pnl):<8.2f} | {pct_pnl:+9.2f}%")
     
     print("=" * 150)
     print(f"{'TOTAL':<69} | ${total_value:<9.2f} | ${total_pnl:<9.2f} | {total_pct_pnl:+9.2f}%")
@@ -139,7 +139,7 @@ def display_wallet_analytics(analytics: Dict[str, Any]):
         analytics: Dictionary with keys time_period, pnl, volume, rank, username
     """
     if not analytics:
-        print("\n❌ No analytics data available.")
+        print("\nNo analytics data available.")
         return
     
     time_period = analytics.get('time_period', 'N/A')
@@ -157,17 +157,17 @@ def display_wallet_analytics(analytics: Dict[str, Any]):
     }.get(time_period, time_period)
     
     # PnL indicator
-    pnl_indicator = "🟢" if pnl >= 0 else "🔴"
+    pnl_indicator = "+" if pnl >= 0 else "-"
     rank_display = f"#{rank}" if rank else "Unranked"
     
     print("\n" + "=" * 70)
     print(f"{'WALLET ANALYTICS':^70}")
     print("=" * 70)
-    print(f"\n👤 User: {username}")
-    print(f"📅 Period: {period_display}")
+    print(f"\nUser: {username}")
+    print(f"Period: {period_display}")
     print(f"{pnl_indicator} P&L: ${pnl:,.2f}")
-    print(f"📊 Volume: ${volume:,.2f}")
-    print(f"🏆 Rank: {rank_display}")
+    print(f"Volume: ${volume:,.2f}")
+    print(f"Rank: {rank_display}")
     print("=" * 70 + "\n")
 
 
@@ -182,20 +182,20 @@ def display_open_orders(orders: List[Dict[str, Any]]):
         List of live orders for further interaction
     """
     if not orders:
-        print("\n📋 No open orders found.")
+        print("\nNo open orders found.")
         return []
     
     # Filter for only LIVE orders
     live_orders = [order for order in orders if order.get('status') == 'LIVE']
     
     if not live_orders:
-        print("\n📋 No open orders found.")
+        print("\nNo open orders found.")
         return []
     
     print("\n" + "=" * 130)
     print(f"{'OPEN ORDERS':^130}")
     print("=" * 130)
-    print(f"\n📍 Total Open Orders: {len(live_orders)}\n")
+    print(f"\nTotal Open Orders: {len(live_orders)}\n")
     
     # Table header
     print(f"{'#':<4} | {'Order ID':<12} | {'Market':<35} | {'Side':<4} | {'Outcome':<7} | {'Price':<8} | {'Size':<8} | {'Filled':<8} | {'Type':<5} | {'Age':<12}")
@@ -238,7 +238,7 @@ def display_open_orders(orders: List[Dict[str, Any]]):
         filled_str = f"{filled_pct:.0f}%"
         
         # Side indicator
-        side_indicator = "🟢" if side == "BUY" else "🔴"
+        side_indicator = "+" if side == "BUY" else "-"
         
         print(f"{i:<4} | {order_id:<12} | {market:<35} | {side_indicator}{side:<3} | {outcome:<7} | ${float(price):<7.3f} | {size_remaining:<8.1f} | {filled_str:<8} | {order_type:<5} | {age_str:<12}")
     

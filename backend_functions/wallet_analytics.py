@@ -96,5 +96,5 @@ def get_holdings(user: str):
                     offset += limit
             return all_positions
         except Exception as e:
-            print(f"❌ Failed to fetch holdings: {e}")
+            print(f"Failed to fetch holdings: {e}")
             return None

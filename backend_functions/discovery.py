@@ -106,9 +106,9 @@ def search_events(
                 completed += 1
                 
                 if error:
-                    print(f"  [{completed}/{len(events)}] ✗ {result.get('slug', 'unknown')}: {error}")
+                    print(f"  [{completed}/{len(events)}] X {result.get('slug', 'unknown')}: {error}")
                 else:
-                    print(f"  [{completed}/{len(events)}] ✓ {result.get('title', 'Unknown')[:50]}")
+                    print(f"  [{completed}/{len(events)}] OK {result.get('title', 'Unknown')[:50]}")
         
         return enriched_events
         

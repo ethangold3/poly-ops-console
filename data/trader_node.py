@@ -57,7 +57,7 @@ class TraderNode:
             human_balance = raw_balance / 1_000_000
             return human_balance
         except Exception as e:
-            print(f"[{self.label}] ❌ Failed to fetch balance: {e}")
+            print(f"[{self.label}] Failed to fetch balance: {e}")
             return 0.0
 
     def get_pnl(self):
@@ -94,10 +94,10 @@ class TraderNode:
             # GTC = Good Til Cancelled (Standard Limit Order)
             ord = self.client.create_order(order_args)
             resp = self.client.post_order(ord, OrderType.GTC)
-            print(f"✅ Limit Order Placed! ID: {resp.get('orderID')}")
+            print(f"Limit Order Placed! ID: {resp.get('orderID')}")
             return resp
         except Exception as e:
-            print(f"❌ Limit Order Failed: {e}")
+            print(f"Limit Order Failed: {e}")
             return None   
 
     def place_market_order(self, market_node: MarketNode, outcome_index: int, side: str, size: float):
@@ -123,10 +123,10 @@ class TraderNode:
             # This protects you from getting partially filled on a tiny order.
             ord = self.client.create_order(order_args)
             resp = self.client.post_order(ord, OrderType.FOK)
-            print(f"⚡ Market Order Executed! ID: {resp.get('orderID')}")
+            print(f"Market Order Executed! ID: {resp.get('orderID')}")
             return resp
         except Exception as e:
-            print(f"❌ Market Order Failed (Likely not enough liquidity): {e}")
+            print(f"Market Order Failed (Likely not enough liquidity): {e}")
             return None
 
 
@@ -140,7 +140,7 @@ class TraderNode:
             book = self.client.get_order_book(token)
             return book
         except Exception as e:
-            print(f"[{self.label}] ❌ Failed to fetch order book for {token}: {e}")
+            print(f"[{self.label}] Failed to fetch order book for {token}: {e}")
             return None
 
 if __name__ == "__main__":
